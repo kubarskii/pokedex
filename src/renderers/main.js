@@ -27,7 +27,7 @@ export const renderMainPage = (params) => {
     }
     const target = document.querySelector('.test');
 
-    const callback = function (entries, observer) {
+    const callback = function (entries) {
         entries.forEach(entry => {
             if (!store.value.pokemons.isLoading && entry.isIntersecting) {
                 const state = store.getState();
@@ -39,5 +39,9 @@ export const renderMainPage = (params) => {
 
     const observer = new IntersectionObserver(callback, options);
     observer.observe(target);
+
+    return () => {
+        observer.disconnect()
+    }
 
 }

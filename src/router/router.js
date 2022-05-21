@@ -1,6 +1,7 @@
 export class Router {
 
     subs = []
+    destroy = []
 
     constructor(routes) {
         this.handleLocation = this.handleLocation.bind(this)
@@ -13,7 +14,7 @@ export class Router {
         this.handleLocation();
     }
 
-    #parseRoutes(routes){
+    #parseRoutes(routes) {
         return Object.entries(routes).reduce((acc, [uri, cb]) => {
             const rule = uri
                 .replace(/([\\\/\-\_\.])/g, "\\$1")
@@ -35,10 +36,14 @@ export class Router {
     }
 
     handleLocation() {
+        this.destroy.forEach(fn => {
+            if (typeof fn === "function") fn()
+        })
+        this.destroy = []
         const path = window.location.pathname;
         const res = [];
         let route;
-        for (let i = 0; i < this.routes.length; i++){
+        for (let i = 0; i < this.routes.length; i++) {
             const matches = path.match(this.routes[i].reg)
             if (matches) {
                 res.push([...matches.map(el => el.replace('/', ''))])
@@ -48,7 +53,7 @@ export class Router {
         }
         this.subs.forEach(fn => fn())
         if (typeof route.handler === 'function')
-            route.handler(res);
+            this.destroy.push(route.handler(res));
     }
 
     route(event) {
